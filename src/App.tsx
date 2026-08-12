@@ -41,6 +41,9 @@ function App() {
     // 현재 라운드의 승자들을 저장
     const [winners, setWinners] = useState<Movie[]>([]);
 
+    // 현재 라운드 저장
+    const [round, setRound] = useState(32);
+
     // 장르별 횟수를 저장
     const [genreCount, setGenreCount] = useState<Record<string, number>>({});
 
@@ -121,6 +124,7 @@ function App() {
             setCandidates(newWinners);
             setWinners([]);
             setCurrentIndex(0);
+            setRound(newWinners.length);
             return;
         }
 
@@ -360,17 +364,21 @@ function App() {
                         </div>
                     ):(
                         <div className="movieSelectWrap">
-                            <MovieCard
-                                movie={firstMovie}
-                                onSelect={selectMovie}
-                            />
+                            <h2>🎞️ {round===2?"결승":`${round}강`} 🎞️</h2>
+                            <div className="movieCardWrap">
+                                <MovieCard
+                                    movie={firstMovie}
+                                    onSelect={selectMovie}
+                                />
 
-                            <p className="vs">VS</p>
+                                <p className="vs">VS</p>
 
-                            <MovieCard
-                                movie={secondMovie}
-                                onSelect={selectMovie}
-                            />
+                                <MovieCard
+                                    movie={secondMovie}
+                                    onSelect={selectMovie}
+                                />
+                            </div>
+
 
                             {/*
                             {
