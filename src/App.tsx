@@ -67,8 +67,15 @@ function App() {
     // 추천 영화 저장
     const [recommendedMovies, setRecommendedMovies] = useState<RecommendedMovie[]>([]);
 
-    // 추천 영화 4개 자르기
-    const topRecommendedMovies = recommendedMovies.slice(0, 4);
+    //
+    const [recommendPage, setRecommendPage] = useState(0);
+    const startIndex = recommendPage * 4;
+    const endIndex = startIndex + 4;
+
+    const topRecommendedMovies = recommendedMovies.slice(
+        startIndex,
+        endIndex
+    );
 
     // 처음 불러온 32개 영화 전체를 별도 state로 저장
     const [allMovies, setAllMovies] = useState<Movie[]>([]);
@@ -141,10 +148,11 @@ function App() {
                 .filter(
                     (recommendedMovie) =>
                         recommendedMovie.poster_path
-                )
-                .slice(0, 4);
+                ).slice(0, 16);
+
 
             setRecommendedMovies(filteredRecommended);
+            setRecommendPage(0);
 
             return;
         }
@@ -423,7 +431,23 @@ function App() {
 
                             {/* 추천 영화 */}
                             <div className="recommendWrap">
-                                <h3>🎞️ 취향에 맞는 추천 영화</h3>
+                                <div className="titleWrap">
+                                    <h3>🎞️ 취향에 맞는 추천 영화</h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const nextPage = recommendPage + 1;
+
+                                            if (nextPage * 4 >= recommendedMovies.length) {
+                                                setRecommendPage(0);
+                                            } else {
+                                                setRecommendPage(nextPage);
+                                            }
+                                        }}
+                                    >
+                                        다른 추천 보기
+                                    </button>
+                                </div>
 
                                 <ul className="recommendList">
                                     {topRecommendedMovies.map((movie) => (
