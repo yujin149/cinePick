@@ -5,24 +5,23 @@
 .titleWrap h1{
     color:#000;
     font-size:30px;
+    margin-bottom:10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:8px;
 }
-.titleWrap p{
-    margin-top:10px;
+.titleWrap h1 p{
+    color:#2563eb;
 }
+
 
 .loadTxt{
     text-align: center;
     margin:20px 0;
 }
 
-.movieSelectWrap > h2{
-    color:#000;
-    text-align: center;
-    font-size:32px;
-    margin:30px 0 40px;
-}
-
-.movieSelectWrap .movieCardWrap{
+.movieSelectWrap {
     display: flex;
     justify-content: center;
     align-items: center;

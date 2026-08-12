@@ -190,7 +190,9 @@ function App() {
     return (
         <>
             <div className="titleWrap">
-                <h1>CINE PICK</h1>
+                <h1>
+                    CINE PICK <p>{round===2?"결승":`${round}강`}</p>
+                </h1>
                 <p>영화 월드컵으로 알아보는 나의 영화 취향</p>
             </div>
 
@@ -364,8 +366,6 @@ function App() {
                         </div>
                     ):(
                         <div className="movieSelectWrap">
-                            <h2>🎞️ {round===2?"결승":`${round}강`} 🎞️</h2>
-                            <div className="movieCardWrap">
                                 <MovieCard
                                     movie={firstMovie}
                                     onSelect={selectMovie}
@@ -377,7 +377,6 @@ function App() {
                                     movie={secondMovie}
                                     onSelect={selectMovie}
                                 />
-                            </div>
 
 
                             {/*
