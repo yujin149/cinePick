@@ -8,3 +8,11 @@ export interface Movie {
     description: string;
     country: string;
 }
+
+export interface RecommendedMovie {
+    id: number;
+    title: string;
+    poster_path: string | null;
+    overview: string;
+    release_date: string;
+}

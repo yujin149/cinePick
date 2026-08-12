@@ -1,6 +1,29 @@
-import type { Movie } from "../types/movie";
+import type { Movie, RecommendedMovie } from "../types/movie";
 
 const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
+
+// 장르명과 ID를 연결하는 객체를 추가
+export const genreIdMap: Record<string, number> = {
+    "액션": 28,
+    "모험": 12,
+    "애니메이션": 16,
+    "코미디": 35,
+    "범죄": 80,
+    "다큐멘터리": 99,
+    "드라마": 18,
+    "가족": 10751,
+    "판타지": 14,
+    "역사": 36,
+    "공포": 27,
+    "음악": 10402,
+    "미스터리": 9648,
+    "로맨스": 10749,
+    "SF": 878,
+    "TV 영화": 10770,
+    "스릴러": 53,
+    "전쟁": 10752,
+    "서부": 37,
+};
 
 export const searchMovie = async (query: string) => {
     const response = await fetch(
@@ -66,4 +89,27 @@ export const getPosterUrl = async (query: string) => {
     }
 
     return `https://image.tmdb.org/t/p/w500${posterPath}`;
+};
+
+// 추천 영화 api 함수 만들기
+export const getRecommendedMovies = async (
+    genreIds: number[]
+): Promise<RecommendedMovie[]> => {
+    const response = await fetch(
+        `https://api.themoviedb.org/3/discover/movie?` +
+        `language=ko-KR` +
+        `&include_adult=false` +
+        `&sort_by=popularity.desc` +
+        `&with_genres=${genreIds.join("|")}`,
+        {
+            headers: {
+                Authorization: `Bearer ${ACCESS_TOKEN}`,
+                accept: "application/json",
+            },
+        }
+    );
+
+    const data = await response.json();
+
+    return data.results;
 };

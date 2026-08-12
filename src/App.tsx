@@ -3,8 +3,8 @@ import MovieCard from "./components/MovieCard";
 import CustomTooltip from "./components/CustomTooltip";
 import DonutTooltip from "./components/DonutTooltip";
 import {movieTitles} from "./data/movies";
-import type {Movie} from "./types/movie";
-import {getMovie} from "./api/tmdb";
+import type { Movie, RecommendedMovie } from "./types/movie";
+import {getMovie, genreIdMap,getRecommendedMovies} from "./api/tmdb";
 import {
     BarChart,
     Bar,
@@ -64,6 +64,15 @@ function App() {
     // 전체 보기 상태
     const [showAllGenres, setShowAllGenres] = useState(false);
 
+    // 추천 영화 저장
+    const [recommendedMovies, setRecommendedMovies] = useState<RecommendedMovie[]>([]);
+
+    // 추천 영화 4개 자르기
+    const topRecommendedMovies = recommendedMovies.slice(0, 4);
+
+    // 처음 불러온 32개 영화 전체를 별도 state로 저장
+    const [allMovies, setAllMovies] = useState<Movie[]>([]);
+
     useEffect(() => {
         const loadPosters = async () => {
             const updatedMovies = await Promise.all(
@@ -73,22 +82,17 @@ function App() {
             console.log("포스터 추가된 영화:", updatedMovies);
             setCandidates(updatedMovies);
 
+            // 처음 불러온 32개 영화 전체 저장
+            setAllMovies(updatedMovies);
+
             // 포스터 로딩 완료
             setIsLoading(false);
         };
 
-        // TMDB 영화 데이터 테스트
-        const testMovie = async () => {
-            const movie = await getMovie("인터스텔라");
-
-            console.log("TMDB에서 가져온 영화:", movie);
-        };
-
         loadPosters();
-        testMovie();
     }, []);
 
-    const selectMovie = (movie: Movie) => {
+    const selectMovie = async (movie: Movie) => {
         // setSelectedMovie(movie);
 
         // 선택할 때마다 배열에 추가
@@ -116,6 +120,31 @@ function App() {
             setGenreCount(newGenreCount);
 
             console.log("장르별 선택 횟수:", newGenreCount);
+            const topGenres = Object.entries(newGenreCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 2)
+                .map(([genre]) => genre);
+
+            const topGenreIds = topGenres
+                .map((genre) => genreIdMap[genre])
+                .filter((id) => id !== undefined);
+
+            const recommended = await getRecommendedMovies(topGenreIds);
+
+            const filteredRecommended = recommended
+                .filter(
+                    (recommendedMovie) =>
+                        !allMovies.some(
+                            (movie) => movie.id === recommendedMovie.id
+                        )
+                )
+                .filter(
+                    (recommendedMovie) =>
+                        recommendedMovie.poster_path
+                )
+                .slice(0, 4);
+
+            setRecommendedMovies(filteredRecommended);
 
             return;
         }
@@ -392,6 +421,27 @@ function App() {
 
                             </div>
 
+                            {/* 추천 영화 */}
+                            <div className="recommendWrap">
+                                <h3>🎞️ 취향에 맞는 추천 영화</h3>
+
+                                <ul className="recommendList">
+                                    {topRecommendedMovies.map((movie) => (
+                                        <li key={movie.id}>
+                                            {movie.poster_path && (
+                                                <div className="imgWrap">
+                                                    <img
+                                                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                                        alt={movie.title}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <p>{movie.title}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
                     ) : (
                         <div className="movieSelectWrap">
