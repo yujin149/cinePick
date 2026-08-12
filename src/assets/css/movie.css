@@ -238,3 +238,31 @@
     margin-left: auto;
     font-weight: 700;
 }
+
+/* 파이차트 범례 */
+.donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 140px;
+}
+
+.donut-legend-item {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 13px;
+    color: #64748b;
+}
+
+.donut-legend-color {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+}
+
+.donut-legend-value {
+    color: #334155;
+}

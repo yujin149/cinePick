@@ -2,9 +2,9 @@ import {useState, useEffect, useRef} from "react";
 import MovieCard from "./components/MovieCard";
 import CustomTooltip from "./components/CustomTooltip";
 import DonutTooltip from "./components/DonutTooltip";
-import {movieTitles } from "./data/movies";
-import type{Movie} from "./types/movie";
-import { getMovie } from "./api/tmdb";
+import {movieTitles} from "./data/movies";
+import type {Movie} from "./types/movie";
+import {getMovie} from "./api/tmdb";
 import {
     BarChart,
     Bar,
@@ -15,6 +15,7 @@ import {
     PieChart,
     Pie,
     Cell,
+    Legend,
 } from "recharts";
 
 
@@ -101,7 +102,7 @@ function App() {
         setWinners(newWinners);
 
         // 후보가 2개라면 결승전이므로 선택한 영화를 최종 우승자로 저장
-        if(candidates.length === 2){
+        if (candidates.length === 2) {
             setChampion(movie);
 
             const newGenreCount: Record<string, number> = {};
@@ -191,14 +192,14 @@ function App() {
         <>
             <div className="titleWrap">
                 <h1>
-                    CINE PICK <p>{round===2?"결승":`${round}강`}</p>
+                    CINE PICK <p>{round === 2 ? "결승" : `${round}강`}</p>
                 </h1>
                 <p>영화 월드컵으로 알아보는 나의 영화 취향</p>
             </div>
 
             {isLoading ? (
                 <p className="loadTxt">영화를 불러오는 중...</p>
-            ):(
+            ) : (
                 champion ?
                     (
                         <div className="winnerMovie">
@@ -216,7 +217,7 @@ function App() {
                             <div className="movieChart">
                                 {showAllGenres ? (
                                     // true → 전체 장르 도넛 차트
-                                    <div style={{ width: "100%", height: "360px" }}>
+                                    <div style={{width: "100%", height: "360px"}}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <PieChart
                                                 onMouseMove={(state) => {
@@ -235,7 +236,7 @@ function App() {
                                                     data={genreChartData}
                                                     dataKey="percentage"
                                                     nameKey="genre"
-                                                    cx="50%"
+                                                    cx="40%"
                                                     cy="50%"
                                                     innerRadius={70}
                                                     outerRadius={130}
@@ -253,7 +254,7 @@ function App() {
 
                                                 {donutTooltipPosition && (
                                                     <Tooltip
-                                                        content={<DonutTooltip />}
+                                                        content={<DonutTooltip/>}
                                                         isAnimationActive={false}
                                                         position={{
                                                             x: donutTooltipPosition.x + 12,
@@ -261,12 +262,40 @@ function App() {
                                                         }}
                                                     />
                                                 )}
+                                                <Legend
+                                                    layout="vertical"
+                                                    verticalAlign="middle"
+                                                    align="right"
+                                                    content={() => (
+                                                        <div className="donut-legend">
+                                                            {genreChartData.map((item, index) => (
+                                                                <div className="donut-legend-item" key={item.genre}>
+                                                                    <span
+                                                                    className="donut-legend-color"
+                                                                    style={{
+                                                                      backgroundColor:
+                                                                          donutColors[index % donutColors.length],
+                                                                    }}
+                                                                    />
+
+                                                                    <span className="donut-legend-name">
+                                                                    {item.genre}
+                                                                    </span>
+
+                                                                    <strong className="donut-legend-value">
+                                                                    {item.percentage}%
+                                                                    </strong>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                />
                                             </PieChart>
                                         </ResponsiveContainer>
                                     </div>
-                                    ) : (
+                                ) : (
                                     // false → 기존 상위 6개 BarChart
-                                    <div style={{ width: "100%", height: `${chartHeight}px`}} ref={chartRef}>
+                                    <div style={{width: "100%", height: `${chartHeight}px`}} ref={chartRef}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart
                                                 data={topGenreChartData}
@@ -318,17 +347,17 @@ function App() {
                                                         (dataMax: number) => Math.ceil(dataMax * 1.2)
                                                     ]}
                                                     unit="%"
-                                                    tick={{ fill: "#64748b", fontSize: 14 }}
-                                                    axisLine={{ stroke: "#cbd5e1" }}
-                                                    tickLine={{ stroke: "#cbd5e1" }}
+                                                    tick={{fill: "#64748b", fontSize: 14}}
+                                                    axisLine={{stroke: "#cbd5e1"}}
+                                                    tickLine={{stroke: "#cbd5e1"}}
                                                 />
 
                                                 <YAxis
                                                     type="category"
                                                     dataKey="genre"
                                                     interval={0}
-                                                    tick={{ fill: "#64748b", fontSize: 14 }}
-                                                    axisLine={{ stroke: "#cbd5e1" }}
+                                                    tick={{fill: "#64748b", fontSize: 14}}
+                                                    axisLine={{stroke: "#cbd5e1"}}
                                                     tickLine={false}
                                                     width={80}
                                                 />
@@ -339,7 +368,7 @@ function App() {
                                                             side={tooltipPosition?.side ?? "right"}
                                                         />
                                                     }
-                                                    cursor={{ fill: "#eff6ff" }}
+                                                    cursor={{fill: "#eff6ff"}}
                                                     position={
                                                         tooltipPosition
                                                             ? {
@@ -353,7 +382,7 @@ function App() {
                                                 <Bar
                                                     dataKey="percentage"
                                                     fill="#bfdbfe"
-                                                    activeBar={{ fill: "#2563eb" }}
+                                                    activeBar={{fill: "#2563eb"}}
                                                     radius={[0, 5, 5, 0]}
                                                 />
                                             </BarChart>
@@ -364,19 +393,19 @@ function App() {
                             </div>
 
                         </div>
-                    ):(
+                    ) : (
                         <div className="movieSelectWrap">
-                                <MovieCard
-                                    movie={firstMovie}
-                                    onSelect={selectMovie}
-                                />
+                            <MovieCard
+                                movie={firstMovie}
+                                onSelect={selectMovie}
+                            />
 
-                                <p className="vs">VS</p>
+                            <p className="vs">VS</p>
 
-                                <MovieCard
-                                    movie={secondMovie}
-                                    onSelect={selectMovie}
-                                />
+                            <MovieCard
+                                movie={secondMovie}
+                                onSelect={selectMovie}
+                            />
 
 
                             {/*
