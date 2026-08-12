@@ -4,10 +4,12 @@ body {
     font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-size: 15px;
     color:#555;
+    font-weight:500;
     background-color:#f8fafc;
 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding:20px 0 40px;
 }
 
 *{

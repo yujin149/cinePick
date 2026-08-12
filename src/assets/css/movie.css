@@ -101,6 +101,10 @@
     gap:20px;
     margin:0 auto;
 }
+.championTit{
+    position:relative;
+    width: 100%;
+}
 
 .winnerMovie h2{
     color:#000;
@@ -178,4 +182,53 @@
 }
 .tooltip-content span{
     text-transform: capitalize;
+}
+
+.allChartBtn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height:30px;
+    padding:0 10px;
+    border:1px solid #d7d7d7;
+    background:#f1f5f9;
+    border-radius: 5px;
+    font-size:13px;
+    letter-spacing: -1px;
+    color:#475569;
+    cursor: pointer;
+    position:absolute;
+    top:50%;
+    right:0;
+    transform: translateY(-50%);
+}
+.allChartBtn:hover{
+    background:#e2e8f0;
+}
+
+/* 파이차트 툴팁 */
+.donut-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    min-width: 120px;
+    padding: 10px 12px;
+
+    background: rgba(15, 23, 42, 0.8);
+    color: #fff;
+
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+    font-size: 13px;
+}
+
+.donut-tooltip strong {
+    font-weight: 700;
+}
+
+.donut-tooltip span {
+    margin-left: auto;
+    font-weight: 700;
 }

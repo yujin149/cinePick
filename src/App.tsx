@@ -1,6 +1,7 @@
 import {useState, useEffect, useRef} from "react";
 import MovieCard from "./components/MovieCard";
 import CustomTooltip from "./components/CustomTooltip";
+import DonutTooltip from "./components/DonutTooltip";
 import {movieTitles } from "./data/movies";
 import type{Movie} from "./types/movie";
 import { getMovie } from "./api/tmdb";
@@ -11,6 +12,9 @@ import {
     YAxis,
     Tooltip,
     ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
 } from "recharts";
 
 
@@ -52,6 +56,9 @@ function App() {
 
     // 차트 DOM 위치를 확인하기 위한 ref
     const chartRef = useRef<HTMLDivElement>(null);
+
+    // 전체 보기 상태
+    const [showAllGenres, setShowAllGenres] = useState(false);
 
     useEffect(() => {
         const loadPosters = async () => {
@@ -141,8 +148,40 @@ function App() {
         })
         .sort((a, b) => b.percentage - a.percentage);
 
+    const topGenreChartData = genreChartData.slice(0, 6);
+
     // 장르 갯수에 따른 차트 높이
-    const chartHeight = Math.max(360, genreChartData.length * 45);
+    const chartHeight = Math.max(360, topGenreChartData.length * 45);
+
+
+    // 도넛 차트 색상 배열
+    const donutColors = [
+        // TOP 6 - Blue
+        "#2563EB", // 1위
+        "#3B82F6", // 2위
+        "#60A5FA", // 3위
+        "#7DB5F5", // 4위
+        "#93C5FD", // 5위
+        "#BFDBFE", // 6위
+
+        // 7위부터 - Gray
+        "#64748B",
+        "#718096",
+        "#7F8A9A",
+        "#8D98A6",
+        "#9CA3AF",
+        "#AAB1BA",
+        "#B8BEC6",
+        "#C5CBD2",
+        "#D1D5DB",
+        "#E2E8F0",
+    ];
+
+    // 도넛 차트 좌표
+    const [donutTooltipPosition, setDonutTooltipPosition] = useState<{
+        x: number;
+        y: number;
+    } | null>(null);
 
     return (
         <>
@@ -157,100 +196,167 @@ function App() {
                 champion ?
                     (
                         <div className="winnerMovie">
-                            <h2>🏆{champion.title}</h2>
+                            <div className="championTit">
+                                <h2>🏆{champion.title}</h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAllGenres(!showAllGenres)}
+                                    className="allChartBtn"
+                                >
+                                    {showAllGenres ? "상위 6개 보기" : "전체 보기"}
+                                </button>
+                            </div>
 
                             <div className="movieChart">
-                                <div style={{ width: "100%", height: `${chartHeight}px`}} ref={chartRef}>
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart
-                                            data={genreChartData}
-                                            layout="vertical"
-                                            barCategoryGap="15%"
-                                            onMouseMove={(state) => {
-                                                if (!state?.activeCoordinate) {
-                                                    return;
-                                                }
+                                {showAllGenres ? (
+                                    // true → 전체 장르 도넛 차트
+                                    <div style={{ width: "100%", height: "360px" }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart
+                                                onMouseMove={(state) => {
+                                                    if (state?.activeCoordinate) {
+                                                        setDonutTooltipPosition({
+                                                            x: state.activeCoordinate.x,
+                                                            y: state.activeCoordinate.y,
+                                                        });
+                                                    }
+                                                }}
+                                                onMouseLeave={() => {
+                                                    setDonutTooltipPosition(null);
+                                                }}
+                                            >
+                                                <Pie
+                                                    data={genreChartData}
+                                                    dataKey="percentage"
+                                                    nameKey="genre"
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={70}
+                                                    outerRadius={130}
+                                                    paddingAngle={2}
+                                                    cornerRadius={6}
+                                                    stroke="none"
+                                                >
+                                                    {genreChartData.map((item, index) => (
+                                                        <Cell
+                                                            key={item.genre}
+                                                            fill={donutColors[index % donutColors.length]}
+                                                        />
+                                                    ))}
+                                                </Pie>
 
-                                                const rect = chartRef.current?.getBoundingClientRect();
-
-                                                if (!rect) {
-                                                    return;
-                                                }
-
-                                                const tooltipWidth = 140;
-                                                const offset = 12;
-
-                                                // 차트 내부에서의 마우스 위치
-                                                const mouseX = state.activeCoordinate.x;
-                                                const mouseY = state.activeCoordinate.y;
-
-                                                // 브라우저 화면 기준 마우스 X 위치
-                                                const browserX = rect.left + mouseX;
-
-                                                // 오른쪽에 툴팁을 놓았을 때 화면을 벗어나는지 확인
-                                                const shouldShowLeft =
-                                                    browserX + tooltipWidth + offset > window.innerWidth;
-
-                                                setTooltipPosition({
-                                                    x: shouldShowLeft
-                                                        ? mouseX - tooltipWidth - offset
-                                                        : mouseX + offset,
-
-                                                    y: mouseY,
-
-                                                    side: shouldShowLeft ? "left" : "right",
-                                                });
-                                            }}
-                                            onMouseLeave={() => {
-                                                setTooltipPosition(null);
-                                            }}
-                                        >
-                                            <XAxis
-                                                type="number"
-                                                domain={[0, 100]}
-                                                unit="%"
-                                                tick={{ fill: "#64748b", fontSize: 14 }}
-                                                axisLine={{ stroke: "#cbd5e1" }}
-                                                tickLine={{ stroke: "#cbd5e1" }}
-                                            />
-
-                                            <YAxis
-                                                type="category"
-                                                dataKey="genre"
-                                                interval={0}
-                                                tick={{ fill: "#64748b", fontSize: 14 }}
-                                                axisLine={{ stroke: "#cbd5e1" }}
-                                                tickLine={false}
-                                                width={80}
-                                            />
-
-                                            <Tooltip
-                                                content={
-                                                    <CustomTooltip
-                                                        side={tooltipPosition?.side ?? "right"}
+                                                {donutTooltipPosition && (
+                                                    <Tooltip
+                                                        content={<DonutTooltip />}
+                                                        isAnimationActive={false}
+                                                        position={{
+                                                            x: donutTooltipPosition.x + 12,
+                                                            y: donutTooltipPosition.y - 30,
+                                                        }}
                                                     />
-                                                }
-                                                cursor={{ fill: "#eff6ff" }}
-                                                position={
-                                                    tooltipPosition
-                                                        ? {
-                                                            x: tooltipPosition.x,
-                                                            y: tooltipPosition.y - 35,
-                                                        }
-                                                        : undefined
-                                                }
-                                            />
+                                                )}
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    ) : (
+                                    // false → 기존 상위 6개 BarChart
+                                    <div style={{ width: "100%", height: `${chartHeight}px`}} ref={chartRef}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart
+                                                data={topGenreChartData}
+                                                layout="vertical"
+                                                barCategoryGap="15%"
+                                                onMouseMove={(state) => {
+                                                    if (!state?.activeCoordinate) {
+                                                        return;
+                                                    }
 
-                                            <Bar
-                                                dataKey="percentage"
-                                                fill="#bfdbfe"
-                                                activeBar={{ fill: "#2563eb" }}
-                                                radius={[0, 5, 5, 0]}
-                                            />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
+                                                    const rect = chartRef.current?.getBoundingClientRect();
+
+                                                    if (!rect) {
+                                                        return;
+                                                    }
+
+                                                    const tooltipWidth = 140;
+                                                    const offset = 12;
+
+                                                    // 차트 내부에서의 마우스 위치
+                                                    const mouseX = state.activeCoordinate.x;
+                                                    const mouseY = state.activeCoordinate.y;
+
+                                                    // 브라우저 화면 기준 마우스 X 위치
+                                                    const browserX = rect.left + mouseX;
+
+                                                    // 오른쪽에 툴팁을 놓았을 때 화면을 벗어나는지 확인
+                                                    const shouldShowLeft =
+                                                        browserX + tooltipWidth + offset > window.innerWidth;
+
+                                                    setTooltipPosition({
+                                                        x: shouldShowLeft
+                                                            ? mouseX - tooltipWidth - offset
+                                                            : mouseX + offset,
+
+                                                        y: mouseY,
+
+                                                        side: shouldShowLeft ? "left" : "right",
+                                                    });
+                                                }}
+                                                onMouseLeave={() => {
+                                                    setTooltipPosition(null);
+                                                }}
+                                            >
+                                                <XAxis
+                                                    type="number"
+                                                    domain={[
+                                                        0,
+                                                        (dataMax: number) => Math.ceil(dataMax * 1.2)
+                                                    ]}
+                                                    unit="%"
+                                                    tick={{ fill: "#64748b", fontSize: 14 }}
+                                                    axisLine={{ stroke: "#cbd5e1" }}
+                                                    tickLine={{ stroke: "#cbd5e1" }}
+                                                />
+
+                                                <YAxis
+                                                    type="category"
+                                                    dataKey="genre"
+                                                    interval={0}
+                                                    tick={{ fill: "#64748b", fontSize: 14 }}
+                                                    axisLine={{ stroke: "#cbd5e1" }}
+                                                    tickLine={false}
+                                                    width={80}
+                                                />
+
+                                                <Tooltip
+                                                    content={
+                                                        <CustomTooltip
+                                                            side={tooltipPosition?.side ?? "right"}
+                                                        />
+                                                    }
+                                                    cursor={{ fill: "#eff6ff" }}
+                                                    position={
+                                                        tooltipPosition
+                                                            ? {
+                                                                x: tooltipPosition.x,
+                                                                y: tooltipPosition.y - 35,
+                                                            }
+                                                            : undefined
+                                                    }
+                                                />
+
+                                                <Bar
+                                                    dataKey="percentage"
+                                                    fill="#bfdbfe"
+                                                    activeBar={{ fill: "#2563eb" }}
+                                                    radius={[0, 5, 5, 0]}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                )}
+
                             </div>
+
                         </div>
                     ):(
                         <div className="movieSelectWrap">
