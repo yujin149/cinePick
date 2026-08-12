@@ -27,7 +27,7 @@
     display: flex;
     justify-content:flex-start;
     align-items: flex-start;
-    gap:10px;
+    gap:20px;
     width:380px;
     background:#fff;
     cursor: pointer;
@@ -51,7 +51,6 @@
 
 .movieInfo h2{
     font-size:18px;
-    margin-top:10px;
     text-align: left;
 }
 .movieInfo .list{
@@ -76,9 +75,12 @@
 
 .movieInfo .description{
     color:#555;
-    font-size:14px;
-    word-break: keep-all;
+    font-size:13px;
     text-align: left;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
 }
 
 .vs{

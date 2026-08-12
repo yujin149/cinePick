@@ -1,9 +1,9 @@
 import {useState, useEffect, useRef} from "react";
 import MovieCard from "./components/MovieCard";
 import CustomTooltip from "./components/CustomTooltip";
-import {movies} from "./data/movies";
+import {movieTitles } from "./data/movies";
 import type{Movie} from "./types/movie";
-import { getPosterUrl } from "./api/tmdb";
+import { getMovie } from "./api/tmdb";
 import {
     BarChart,
     Bar,
@@ -20,7 +20,7 @@ function App() {
 
 
     // 현재 라운드 후보
-    const [candidates, setCandidates] = useState<Movie[]>(movies);
+    const [candidates, setCandidates] = useState<Movie[]>([]);
 
     // 현재 대결에서 첫 번째 영화의 index
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,7 +29,7 @@ function App() {
     const secondMovie = candidates[currentIndex + 1];
 
     // 가장 최근에 선택한 영화 저장
-    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+    //const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
     // 선택했던 영화들을 전부 저장
     const [selectedMovies, setSelectedMovies] = useState<Movie[]>([]);
@@ -56,14 +56,7 @@ function App() {
     useEffect(() => {
         const loadPosters = async () => {
             const updatedMovies = await Promise.all(
-                movies.map(async (movie) => {
-                    const posterUrl = await getPosterUrl(movie.title);
-
-                    return {
-                        ...movie,
-                        posterUrl: posterUrl,
-                    };
-                })
+                movieTitles.map((title) => getMovie(title))
             );
 
             console.log("포스터 추가된 영화:", updatedMovies);
@@ -73,11 +66,19 @@ function App() {
             setIsLoading(false);
         };
 
+        // TMDB 영화 데이터 테스트
+        const testMovie = async () => {
+            const movie = await getMovie("인터스텔라");
+
+            console.log("TMDB에서 가져온 영화:", movie);
+        };
+
         loadPosters();
+        testMovie();
     }, []);
 
     const selectMovie = (movie: Movie) => {
-        setSelectedMovie(movie);
+        // setSelectedMovie(movie);
 
         // 선택할 때마다 배열에 추가
         const newSelectedMovies = [...selectedMovies, movie];
@@ -127,8 +128,8 @@ function App() {
     );
 
     // 차트에 넣을 데이터 배열
-    const genreChartData = Object.entries(genreCount).map(
-        ([genre, count]) => {
+    const genreChartData = Object.entries(genreCount)
+        .map(([genre, count]) => {
             const percentage = Math.round(
                 (count / totalGenreCount) * 100
             );
@@ -137,8 +138,11 @@ function App() {
                 genre,
                 percentage,
             };
-        }
-    );
+        })
+        .sort((a, b) => b.percentage - a.percentage);
+
+    // 장르 갯수에 따른 차트 높이
+    const chartHeight = Math.max(360, genreChartData.length * 45);
 
     return (
         <>
@@ -156,7 +160,7 @@ function App() {
                             <h2>🏆{champion.title}</h2>
 
                             <div className="movieChart">
-                                <div style={{ width: "100%", height: "360px"}} ref={chartRef}>
+                                <div style={{ width: "100%", height: `${chartHeight}px`}} ref={chartRef}>
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart
                                             data={genreChartData}
@@ -213,6 +217,7 @@ function App() {
                                             <YAxis
                                                 type="category"
                                                 dataKey="genre"
+                                                interval={0}
                                                 tick={{ fill: "#64748b", fontSize: 14 }}
                                                 axisLine={{ stroke: "#cbd5e1" }}
                                                 tickLine={false}
