@@ -80,6 +80,9 @@ function App() {
     // 처음 불러온 32개 영화 전체를 별도 state로 저장
     const [allMovies, setAllMovies] = useState<Movie[]>([]);
 
+    // 선택한 추천영화 저장
+    const [selectedRecommendedMovie, setSelectedRecommendedMovie] = useState<RecommendedMovie | null>(null);
+
     useEffect(() => {
         const loadPosters = async () => {
             const updatedMovies = await Promise.all(
@@ -451,7 +454,11 @@ function App() {
 
                                 <ul className="recommendList">
                                     {topRecommendedMovies.map((movie) => (
-                                        <li key={movie.id}>
+                                        <li
+                                            key={movie.id}
+                                            onClick={() => setSelectedRecommendedMovie(movie)}
+                                            className="recommendItem"
+                                        >
                                             {movie.poster_path && (
                                                 <div className="imgWrap">
                                                     <img
@@ -464,6 +471,38 @@ function App() {
                                             <p>{movie.title}</p>
                                         </li>
                                     ))}
+                                    {selectedRecommendedMovie && (
+                                        <div className="movie-modal-overlay">
+                                            <div className="movie-modal">
+                                                <button
+                                                    type="button"
+                                                    className="movie-modal-close"
+                                                    onClick={() => setSelectedRecommendedMovie(null)}
+                                                >
+                                                    ✕
+                                                </button>
+
+                                                {selectedRecommendedMovie.poster_path && (
+                                                    <img
+                                                        src={`https://image.tmdb.org/t/p/w500${selectedRecommendedMovie.poster_path}`}
+                                                        alt={selectedRecommendedMovie.title}
+                                                    />
+                                                )}
+
+                                                <div className="movie-modal-info">
+                                                    <h3>{selectedRecommendedMovie.title}</h3>
+
+                                                    <p className="year"> <span>개봉연도 : </span>
+                                                        {selectedRecommendedMovie.release_date
+                                                            ? selectedRecommendedMovie.release_date.slice(0, 4)
+                                                            : ""}
+                                                    </p>
+
+                                                    <p className="description">{selectedRecommendedMovie.overview}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </ul>
                             </div>
                         </div>
