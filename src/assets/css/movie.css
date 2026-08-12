@@ -269,16 +269,18 @@
 
 /* 추천 영화 */
 .recommendWrap{
+    padding-top:20px;
     margin-top:40px;
     width:100%;
+    border-top:1px solid #d7d7d7;
 }
 .recommendWrap .titleWrap{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin:0 0 12px;
 }
 .recommendWrap h3{
-    margin-bottom:10px;
     color:#000;
 }
 .recommendWrap .titleWrap button{
