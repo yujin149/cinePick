@@ -100,6 +100,10 @@ export const getRecommendedMovies = async (
         `language=ko-KR` +
         `&include_adult=false` +
         `&sort_by=popularity.desc` +
+        `&primary_release_date.gte=2012-01-01` +    // 개봉연도 2012년부터 지정
+        //`&certification.lte=15` +                   // 연령 등급 필터링
+        `&vote_count.gte=200` +                     // 최소 200명 이상이 평가한 영화만
+        `&vote_average.gte=6` +                     // 평균 평점 6점 이상인 영화만
         `&with_genres=${genreIds.join("|")}`,
         {
             headers: {
